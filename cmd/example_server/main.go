@@ -1,7 +1,6 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/byebyebruce/lockstepserver/pkg/util"
 	"github.com/byebyebruce/lockstepserver/pkg/xconfig"
@@ -11,7 +10,7 @@ import (
 	"time"
 
 	"github.com/byebyebruce/lockstepserver/cmd/example_server/api"
-	"github.com/byebyebruce/lockstepserver/pkg/log4gox"
+	"github.com/byebyebruce/lockstepserver/frame/log4gox"
 	"github.com/byebyebruce/lockstepserver/server"
 
 	l4g "github.com/alecthomas/log4go"
@@ -19,9 +18,7 @@ import (
 
 func main() {
 	//读取环境变量
-	config := flag.String("config", "", "dev/test/prod")
-	flag.Parse()
-	xconfig.MustInitialize(fmt.Sprintf("configs/%s.yaml", *config))
+	xconfig.MustInitialize()
 
 	l4g.Close()
 	l4g.AddFilter("debug logger", l4g.DEBUG, log4gox.NewColorConsoleLogWriter())

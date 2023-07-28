@@ -2,10 +2,10 @@ package server
 
 import (
 	"fmt"
+	"github.com/byebyebruce/lockstepserver/frame/kcp_server"
+	"github.com/byebyebruce/lockstepserver/frame/network"
+	"github.com/byebyebruce/lockstepserver/frame/packet/pb_packet"
 	"github.com/byebyebruce/lockstepserver/logic"
-	"github.com/byebyebruce/lockstepserver/pkg/kcp_server"
-	"github.com/byebyebruce/lockstepserver/pkg/network"
-	"github.com/byebyebruce/lockstepserver/pkg/packet/pb_packet"
 )
 
 // LockStepServer 帧同步服务器

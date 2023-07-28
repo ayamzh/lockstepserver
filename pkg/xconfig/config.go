@@ -2,6 +2,7 @@ package xconfig
 
 import (
 	"bytes"
+	"fmt"
 	"github.com/sandwich-go/xconf"
 )
 
@@ -29,9 +30,9 @@ type visitor struct {
 
 var c Visitor
 
-func MustInitialize(files ...string) {
+func MustInitialize() {
 	cc := NewConfig()
-	x := xconf.New(xconf.WithFiles(files...))
+	x := xconf.New()
 	err := x.Parse(cc)
 	if err != nil {
 		panic(err)
@@ -46,8 +47,8 @@ func printConfig() {
 	//	return
 	//}
 	bytesBuffer := bytes.NewBuffer([]byte{})
-	xconf.MustSaveVarToWriter(c, xconf.ConfigTypeTOML, bytesBuffer)
-	//fmt.Println(bytesBuffer)
+	xconf.MustSaveVarToWriter(c, xconf.ConfigTypeYAML, bytesBuffer)
+	fmt.Println(bytesBuffer)
 	bytesBuffer.Reset()
 }
 
