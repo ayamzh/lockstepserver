@@ -15,8 +15,8 @@ type Config struct {
 
 type Server struct {
 	config    *Config         // server configuration
-	callback  ConnCallback    // message callbacks in connection
-	protocol  Protocol        // customize packet protocol
+	callback  IConnCallback   // message callbacks in connection
+	protocol  IProtocol       // customize packet protocol
 	exitChan  chan struct{}   // notify all goroutines to shutdown
 	waitGroup *sync.WaitGroup // wait for all goroutines
 	closeOnce sync.Once
@@ -24,7 +24,7 @@ type Server struct {
 }
 
 // NewServer creates a server
-func NewServer(config *Config, callback ConnCallback, protocol Protocol) *Server {
+func NewServer(config *Config, callback IConnCallback, protocol IProtocol) *Server {
 	return &Server{
 		config:    config,
 		callback:  callback,

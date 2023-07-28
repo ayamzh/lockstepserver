@@ -23,20 +23,20 @@ type Conn struct {
 	closeOnce         sync.Once     // close the conn, once, per instance
 	closeFlag         int32         // close flag
 	closeChan         chan struct{} // close chanel
-	packetSendChan    chan Packet   // packet send chanel
-	packetReceiveChan chan Packet   // packeet receive chanel
-	callback          ConnCallback  // callback
+	packetSendChan    chan IPacket  // packet send chanel
+	packetReceiveChan chan IPacket  // packeet receive chanel
+	callback          IConnCallback // callback
 }
 
-// ConnCallback is an interface of methods that are used as callbacks on a connection
-type ConnCallback interface {
+// IConnCallback is an interface of methods that are used as callbacks on a connection
+type IConnCallback interface {
 	// OnConnect is called when the connection was accepted,
 	// If the return value of false is closed
 	OnConnect(*Conn) bool
 
 	// OnMessage is called when the connection receives a packet,
 	// If the return value of false is closed
-	OnMessage(*Conn, Packet) bool
+	OnMessage(*Conn, IPacket) bool
 
 	// OnClose is called when the connection closed
 	OnClose(*Conn)
@@ -49,8 +49,8 @@ func NewConn(conn net.Conn, srv *Server) *Conn {
 		callback:          srv.callback,
 		conn:              conn,
 		closeChan:         make(chan struct{}),
-		packetSendChan:    make(chan Packet, srv.config.PacketSendChanLimit),
-		packetReceiveChan: make(chan Packet, srv.config.PacketReceiveChanLimit),
+		packetSendChan:    make(chan IPacket, srv.config.PacketSendChanLimit),
+		packetReceiveChan: make(chan IPacket, srv.config.PacketReceiveChanLimit),
 	}
 }
 
@@ -86,12 +86,12 @@ func (c *Conn) IsClosed() bool {
 	return atomic.LoadInt32(&c.closeFlag) == 1
 }
 
-func (c *Conn) SetCallback(callback ConnCallback) {
+func (c *Conn) SetCallback(callback IConnCallback) {
 	c.callback = callback
 }
 
 // AsyncWritePacket async writes a packet, this method will never block
-func (c *Conn) AsyncWritePacket(p Packet, timeout time.Duration) (err error) {
+func (c *Conn) AsyncWritePacket(p IPacket, timeout time.Duration) (err error) {
 	if c.IsClosed() {
 		return ErrConnClosing
 	}

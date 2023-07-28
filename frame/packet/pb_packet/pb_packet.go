@@ -85,7 +85,7 @@ func NewPacket(id uint8, msg interface{}) *Packet {
 type MsgProtocol struct {
 }
 
-func (p *MsgProtocol) ReadPacket(r io.Reader) (network.Packet, error) /*Packet*/ {
+func (p *MsgProtocol) ReadPacket(r io.Reader) (network.IPacket, error) /*Packet*/ {
 
 	buff := make([]byte, MinPacketLen, MinPacketLen)
 

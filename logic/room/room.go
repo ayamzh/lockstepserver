@@ -20,7 +20,7 @@ const (
 
 type packet struct {
 	id  uint64
-	msg network.Packet
+	msg network.IPacket
 }
 
 // Room 战斗房间
@@ -130,7 +130,7 @@ func (r *Room) OnConnect(conn *network.Conn) bool {
 }
 
 // OnMessage network.Conn callback
-func (r *Room) OnMessage(conn *network.Conn, msg network.Packet) bool {
+func (r *Room) OnMessage(conn *network.Conn, msg network.IPacket) bool {
 
 	id, ok := conn.GetExtraData().(uint64)
 	if !ok {

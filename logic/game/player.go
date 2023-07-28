@@ -53,7 +53,7 @@ func (p *Player) GetSendFrameCount() uint32 {
 	return p.sendFrameCount
 }
 
-func (p *Player) SendMessage(msg network.Packet) {
+func (p *Player) SendMessage(msg network.IPacket) {
 
 	if !p.IsOnline() {
 		return

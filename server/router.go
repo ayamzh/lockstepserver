@@ -25,7 +25,7 @@ func (r *LockStepServer) OnConnect(conn *network.Conn) bool {
 }
 
 // OnMessage 消息处理
-func (r *LockStepServer) OnMessage(conn *network.Conn, p network.Packet) bool {
+func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
 
 	msg := p.(*pb_packet.Packet)
 

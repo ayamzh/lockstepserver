@@ -22,7 +22,7 @@ type testCallback struct {
 	numDiscon uint32
 }
 
-func (t *testCallback) OnMessage(conn *network.Conn, msg network.Packet) bool {
+func (t *testCallback) OnMessage(conn *network.Conn, msg network.IPacket) bool {
 
 	atomic.AddUint32(&t.numMsg, 1)
 

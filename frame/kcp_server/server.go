@@ -8,7 +8,7 @@ import (
 	"github.com/xtaci/kcp-go"
 )
 
-func ListenAndServe(addr string, callback network.ConnCallback, protocol network.Protocol) (*network.Server, error) {
+func ListenAndServe(addr string, callback network.IConnCallback, protocol network.IProtocol) (*network.Server, error) {
 	dupConfig := &network.Config{
 		PacketReceiveChanLimit: 1024,
 		PacketSendChanLimit:    1024,

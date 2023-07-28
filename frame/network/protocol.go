@@ -6,12 +6,12 @@ import (
 	"io"
 )
 
-type Packet interface {
+type IPacket interface {
 	Serialize() []byte
 }
 
-type Protocol interface {
-	ReadPacket(conn io.Reader) (Packet, error)
+type IProtocol interface {
+	ReadPacket(conn io.Reader) (IPacket, error)
 }
 
 type DefaultPacket struct {
@@ -39,7 +39,7 @@ func NewDefaultPacket(buff []byte) *DefaultPacket {
 type DefaultProtocol struct {
 }
 
-func (this *DefaultProtocol) ReadPacket(r io.Reader) (Packet, error) {
+func (this *DefaultProtocol) ReadPacket(r io.Reader) (IPacket, error) {
 	var (
 		lengthBytes []byte = make([]byte, 4)
 		length      uint32

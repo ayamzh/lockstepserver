@@ -477,13 +477,13 @@ func (g *Game) broadcastFrameData() {
 
 }
 
-func (g *Game) broadcast(msg network.Packet) {
+func (g *Game) broadcast(msg network.IPacket) {
 	for _, v := range g.players {
 		v.SendMessage(msg)
 	}
 }
 
-func (g *Game) broadcastExclude(msg network.Packet, id uint64) {
+func (g *Game) broadcastExclude(msg network.IPacket, id uint64) {
 	for _, v := range g.players {
 		if v.id == id {
 			continue
