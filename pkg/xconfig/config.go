@@ -16,7 +16,6 @@ func ConfigOptionDeclareWithDefault() interface{} {
 	return map[string]interface{}{
 		"OptionUsage": string(optionUsage),
 		"HttpPort":    80,   // @MethodComment(HTTP端口)
-		"UdpPort":     8080, // @MethodComment(tcp端口)
 		"DebugLog":    true, // @MethodComment(打开DEBUGLOG)
 		"Server":      (*network.Config)(network.NewServerConf()),
 	}

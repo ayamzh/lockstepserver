@@ -14,7 +14,6 @@ import (
 type Config struct {
 	OptionUsage string          `xconf:"option_usage"`
 	HttpPort    int             `xconf:"http_port" usage:"HTTP端口"`
-	UdpPort     int             `xconf:"udp_port" usage:"tcp端口"`
 	DebugLog    bool            `xconf:"debug_log" usage:"打开DEBUGLOG"`
 	Server      *network.Config `xconf:"server"`
 }
@@ -50,16 +49,6 @@ func WithHttpPort(v int) ConfigOption {
 		previous := cc.HttpPort
 		cc.HttpPort = v
 		return WithHttpPort(previous)
-	}
-}
-
-// tcp端口
-// WithUdpPort option func for UdpPort
-func WithUdpPort(v int) ConfigOption {
-	return func(cc *Config) ConfigOption {
-		previous := cc.UdpPort
-		cc.UdpPort = v
-		return WithUdpPort(previous)
 	}
 }
 
@@ -107,7 +96,6 @@ func newDefaultConfig() *Config {
 	for _, opt := range [...]ConfigOption{
 		WithOptionUsage(optionUsage),
 		WithHttpPort(80),
-		WithUdpPort(8080),
 		WithDebugLog(true),
 		WithServer(network.NewServerConf()),
 	} {
@@ -159,7 +147,6 @@ func AtomicConfig() ConfigVisitor {
 // all getter func
 func (cc *Config) GetOptionUsage() string     { return cc.OptionUsage }
 func (cc *Config) GetHttpPort() int           { return cc.HttpPort }
-func (cc *Config) GetUdpPort() int            { return cc.UdpPort }
 func (cc *Config) GetDebugLog() bool          { return cc.DebugLog }
 func (cc *Config) GetServer() *network.Config { return cc.Server }
 
@@ -167,7 +154,6 @@ func (cc *Config) GetServer() *network.Config { return cc.Server }
 type ConfigVisitor interface {
 	GetOptionUsage() string
 	GetHttpPort() int
-	GetUdpPort() int
 	GetDebugLog() bool
 	GetServer() *network.Config
 }
