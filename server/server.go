@@ -1,6 +1,7 @@
 package server
 
 import (
+	"fmt"
 	"github.com/byebyebruce/lockstepserver/logic"
 	"github.com/byebyebruce/lockstepserver/pkg/kcp_server"
 	"github.com/byebyebruce/lockstepserver/pkg/network"
@@ -15,11 +16,11 @@ type LockStepServer struct {
 }
 
 // New 构造
-func New(address string) (*LockStepServer, error) {
+func New(port int) (*LockStepServer, error) {
 	s := &LockStepServer{
 		roomMgr: logic.NewRoomManager(),
 	}
-	networkServer, err := kcp_server.ListenAndServe(address, s, &pb_packet.MsgProtocol{})
+	networkServer, err := kcp_server.ListenAndServe(fmt.Sprintf(":%d", port), s, &pb_packet.MsgProtocol{})
 	if err != nil {
 		return nil, err
 	}

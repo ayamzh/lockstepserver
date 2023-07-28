@@ -3,6 +3,8 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/byebyebruce/lockstepserver/pkg/util"
+	"github.com/byebyebruce/lockstepserver/pkg/xconfig"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,23 +17,21 @@ import (
 	l4g "github.com/alecthomas/log4go"
 )
 
-var (
-	httpAddress = flag.String("web", ":80", "web listen address")
-	udpAddress  = flag.String("udp", ":10086", "udp listen address(':10086' means localhost:10086)")
-	debugLog    = flag.Bool("log", true, "debug log")
-)
-
 func main() {
+	//读取环境变量
+	config := flag.String("config", "", "dev/test/prod")
 	flag.Parse()
+	xconfig.MustInitialize(fmt.Sprintf("configs/%s.yaml", *config))
 
 	l4g.Close()
 	l4g.AddFilter("debug logger", l4g.DEBUG, log4gox.NewColorConsoleLogWriter())
 
-	s, err := server.New(*udpAddress)
-	if err != nil {
-		panic(err)
-	}
-	_ = api.NewWebAPI(*httpAddress, s.RoomManager())
+	// 启动KCP服务
+	s, err := server.New(xconfig.C().GetUdpPort())
+	util.PanicIfErr(err)
+
+	//启动HTTP服务
+	_ = api.NewWebAPI(xconfig.C().GetHttpPort(), s.RoomManager())
 
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGINT, syscall.SIGTERM, syscall.SIGHUP, os.Interrupt)

@@ -3,6 +3,7 @@ package api
 import (
 	_ "embed"
 	"fmt"
+	"github.com/byebyebruce/lockstepserver/pkg/util"
 	"html/template"
 	"net/http"
 	_ "net/http/pprof"
@@ -21,7 +22,7 @@ type WebAPI struct {
 }
 
 // NewWebAPI 构造
-func NewWebAPI(addr string, m *logic.RoomManager) *WebAPI {
+func NewWebAPI(port int, m *logic.RoomManager) *WebAPI {
 	r := &WebAPI{
 		m: m,
 	}
@@ -30,11 +31,9 @@ func NewWebAPI(addr string, m *logic.RoomManager) *WebAPI {
 	http.HandleFunc("/create", r.createRoom)
 
 	go func() {
-		fmt.Println("web api listen on", addr)
-		e := http.ListenAndServe(addr, nil)
-		if nil != e {
-			panic(e)
-		}
+		fmt.Printf("web api listen on 127.0.0.1:%d \n", port)
+		e := http.ListenAndServe(fmt.Sprintf(":%d", port), nil)
+		util.PanicIfErr(e)
 	}()
 
 	return r
