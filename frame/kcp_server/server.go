@@ -1,27 +1,21 @@
 package kcp_server
 
 import (
-	"net"
-	"time"
-
+	"fmt"
 	"github.com/byebyebruce/lockstepserver/frame/network"
 	"github.com/xtaci/kcp-go"
+	"net"
 )
 
-func ListenAndServe(addr string, callback network.IConnCallback, protocol network.IProtocol) (*network.Server, error) {
-	dupConfig := &network.Config{
-		PacketReceiveChanLimit: 1024,
-		PacketSendChanLimit:    1024,
-		ConnReadTimeout:        time.Second * 5,
-		ConnWriteTimeout:       time.Second * 5,
-	}
+func ListenAndServe(config *network.Config, callback network.IConnCallback,
+	protocol network.IProtocol) (*network.Server, error) {
 
-	l, err := kcp.Listen(addr)
+	l, err := kcp.Listen(fmt.Sprintf(":%d", config.GetUdpPort()))
 	if nil != err {
 		return nil, err
 	}
 
-	server := network.NewServer(dupConfig, callback, protocol)
+	server := network.NewServer(config, callback, protocol)
 	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Conn {
 
 		// 普通模式

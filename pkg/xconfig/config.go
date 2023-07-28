@@ -3,6 +3,7 @@ package xconfig
 import (
 	"bytes"
 	"fmt"
+	"github.com/byebyebruce/lockstepserver/frame/network"
 	"github.com/sandwich-go/xconf"
 )
 
@@ -17,6 +18,7 @@ func ConfigOptionDeclareWithDefault() interface{} {
 		"HttpPort":    80,   // @MethodComment(HTTP端口)
 		"UdpPort":     8080, // @MethodComment(tcp端口)
 		"DebugLog":    true, // @MethodComment(打开DEBUGLOG)
+		"Server":      (*network.Config)(network.NewServerConf()),
 	}
 }
 

@@ -24,7 +24,7 @@ func main() {
 	l4g.AddFilter("debug logger", l4g.DEBUG, log4gox.NewColorConsoleLogWriter())
 
 	// 启动KCP服务
-	s, err := server.New(xconfig.C().GetUdpPort())
+	s, err := server.New(xconfig.C().GetServer())
 	util.PanicIfErr(err)
 
 	//启动HTTP服务

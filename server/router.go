@@ -87,10 +87,12 @@ func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
 		// conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), ret), time.Millisecond)
 		return room.OnConnect(conn)
 
+		// 心跳
 	case pb.ID_MSG_Heartbeat:
 		conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_Heartbeat), nil), time.Millisecond)
 		return true
 
+		// 消息结束
 	case pb.ID_MSG_END:
 		// 正式版不会提供这个消息
 		conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_END), msg.GetData()), time.Millisecond)
