@@ -3,12 +3,10 @@ package game
 import (
 	"time"
 
+	l4g "github.com/alecthomas/log4go"
 	"github.com/byebyebruce/lockstepserver/frame/network"
 	"github.com/byebyebruce/lockstepserver/frame/packet/pb_packet"
 	"github.com/byebyebruce/lockstepserver/pb"
-	"github.com/golang/protobuf/proto"
-
-	l4g "github.com/alecthomas/log4go"
 )
 
 // GameState 游戏状态
@@ -76,7 +74,7 @@ func NewGame(id uint64, players []uint64, randomSeed int32, listener gameListene
 func (g *Game) JoinGame(id uint64, conn *network.Conn) bool {
 
 	msg := &pb.S2C_ConnectMsg{
-		ErrorCode: pb.ERRORCODE_ERR_Ok.Enum(),
+		ErrorCode: pb.ERRORCODE_ERR_Ok,
 	}
 
 	p, ok := g.players[id]
@@ -86,7 +84,7 @@ func (g *Game) JoinGame(id uint64, conn *network.Conn) bool {
 	}
 
 	if k_Ready != g.State && k_Gaming != g.State {
-		msg.ErrorCode = pb.ERRORCODE_ERR_RoomState.Enum()
+		msg.ErrorCode = pb.ERRORCODE_ERR_RoomState
 		p.SendMessage(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), msg))
 		l4g.Error("[game(%d)] player[%d] game is over", g.id, id)
 		return true
@@ -139,8 +137,8 @@ func (g *Game) ProcessMsg(id uint64, msg *pb_packet.Packet) {
 	switch msgID {
 	case pb.ID_MSG_JoinRoom:
 		msg := &pb.S2C_JoinRoomMsg{
-			Roomseatid: proto.Int32(player.idx),
-			RandomSeed: proto.Int32(g.randomSeed),
+			Roomseatid: player.idx,
+			RandomSeed: g.randomSeed,
 		}
 
 		for _, v := range g.players {
@@ -165,7 +163,7 @@ func (g *Game) ProcessMsg(id uint64, msg *pb_packet.Packet) {
 		player.loadingProgress = m.GetPro()
 		msg := pb_packet.NewPacket(uint8(pb.ID_MSG_Progress), &pb.S2C_ProgressMsg{
 
-			Id:  proto.Uint64(player.id),
+			Id:  player.id,
 			Pro: m.Pro,
 		})
 		g.broadcastExclude(msg, player.id)
@@ -320,7 +318,7 @@ func (g *Game) doStart() {
 	}
 	g.startTime = time.Now().Unix()
 	msg := &pb.S2C_StartMsg{
-		TimeStamp: proto.Int64(g.startTime),
+		TimeStamp: g.startTime,
 	}
 	ret := pb_packet.NewPacket(uint8(pb.ID_MSG_Start), msg)
 
@@ -337,11 +335,11 @@ func (g *Game) doGameOver() {
 func (g *Game) pushInput(p *Player, msg *pb.C2S_InputMsg) bool {
 
 	cmd := &pb.InputData{
-		Id:         proto.Uint64(p.id),
-		Sid:        proto.Int32(msg.GetSid()),
-		X:          proto.Int32(msg.GetX()),
-		Y:          proto.Int32(msg.GetY()),
-		Roomseatid: proto.Int32(p.idx),
+		Id:         p.id,
+		Sid:        msg.GetSid(),
+		X:          msg.GetX(),
+		Y:          msg.GetY(),
+		Roomseatid: p.idx,
 	}
 
 	return g.logic.pushCmd(cmd)
@@ -350,7 +348,7 @@ func (g *Game) pushInput(p *Player, msg *pb.C2S_InputMsg) bool {
 func (g *Game) doReconnect(p *Player) {
 
 	msg := &pb.S2C_StartMsg{
-		TimeStamp: proto.Int64(g.startTime),
+		TimeStamp: g.startTime,
 	}
 	ret := pb_packet.NewPacket(uint8(pb.ID_MSG_Start), msg)
 	p.SendMessage(ret)
@@ -368,7 +366,7 @@ func (g *Game) doReconnect(p *Player) {
 		}
 
 		f := &pb.FrameData{
-			FrameID: proto.Uint32(i),
+			FrameID: i,
 		}
 
 		if nil != frameData {
@@ -453,7 +451,7 @@ func (g *Game) broadcastFrameData() {
 			}
 
 			f := &pb.FrameData{
-				FrameID: proto.Uint32(i),
+				FrameID: i,
 			}
 
 			if nil != frameData {

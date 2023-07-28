@@ -192,21 +192,24 @@ func (c *Conn) writeLoop() {
 func (c *Conn) handleLoop() {
 	defer func() {
 		recover()
+		//关闭连接、执行CALLBACK、关闭各种读写chan
 		c.Close()
 	}()
 
 	for {
 		select {
+		//服务关闭
 		case <-c.srv.exitChan:
 			return
-
+		//连接关闭
 		case <-c.closeChan:
 			return
-
+		//接收数据
 		case p := <-c.packetReceiveChan:
 			if c.IsClosed() {
 				return
 			}
+			//消费数据
 			if !c.callback.OnMessage(c, p) {
 				return
 			}
@@ -217,7 +220,7 @@ func (c *Conn) handleLoop() {
 func asyncDo(fn func(), wg *sync.WaitGroup) {
 	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		fn()
-		wg.Done()
 	}()
 }

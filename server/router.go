@@ -32,8 +32,8 @@ func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
 	l4g.Info("[router] OnMessage [%s] msg=[%d] len=[%d]", conn.GetRawConn().RemoteAddr().String(), msg.GetMessageID(), len(msg.GetData()))
 
 	switch pb.ID(msg.GetMessageID()) {
+	// 连接
 	case pb.ID_MSG_Connect:
-
 		rec := &pb.C2S_ConnectMsg{}
 		if err := msg.Unmarshal(rec); nil != err {
 			l4g.Error("[router] msg.Unmarshal error=[%s]", err.Error())
@@ -48,26 +48,26 @@ func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
 		token := rec.GetToken()
 
 		ret := &pb.S2C_ConnectMsg{
-			ErrorCode: pb.ERRORCODE_ERR_Ok.Enum(),
+			ErrorCode: pb.ERRORCODE_ERR_Ok,
 		}
 
 		room := r.roomMgr.GetRoom(roomID)
 		if nil == room {
-			ret.ErrorCode = pb.ERRORCODE_ERR_NoRoom.Enum()
+			ret.ErrorCode = pb.ERRORCODE_ERR_NoRoom
 			conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), ret), time.Millisecond)
 			l4g.Error("[router] no room player=[%d] room=[%d] token=[%s]", playerID, roomID, token)
 			return true
 		}
 
 		if room.IsOver() {
-			ret.ErrorCode = pb.ERRORCODE_ERR_RoomState.Enum()
+			ret.ErrorCode = pb.ERRORCODE_ERR_RoomState
 			conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), ret), time.Millisecond)
 			l4g.Error("[router] room is over player=[%d] room==[%d] token=[%s]", playerID, roomID, token)
 			return true
 		}
 
 		if !room.HasPlayer(playerID) {
-			ret.ErrorCode = pb.ERRORCODE_ERR_NoPlayer.Enum()
+			ret.ErrorCode = pb.ERRORCODE_ERR_NoPlayer
 			conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), ret), time.Millisecond)
 			l4g.Error("[router] !room.HasPlayer(playerID) player=[%d] room==[%d] token=[%s]", playerID, roomID, token)
 			return true
@@ -75,7 +75,7 @@ func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
 
 		// 验证token
 		if token != verifyToken(token) {
-			ret.ErrorCode = pb.ERRORCODE_ERR_Token.Enum()
+			ret.ErrorCode = pb.ERRORCODE_ERR_Token
 			conn.AsyncWritePacket(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), ret), time.Millisecond)
 			l4g.Error("[router] verifyToken failed player=[%d] room==[%d] token=[%s]", playerID, roomID, token)
 			return true
