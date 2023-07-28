@@ -37,8 +37,8 @@ type Room struct {
 
 	exitChan chan struct{}
 	msgQ     chan *packet
-	inChan   chan *network.Conn
-	outChan  chan *network.Conn
+	inChan   chan *network.Session
+	outChan  chan *network.Session
 
 	game *game.Game
 }
@@ -51,8 +51,8 @@ func NewRoom(id uint64, typeID int32, players []uint64, randomSeed int32, logicS
 		typeID:      typeID,
 		exitChan:    make(chan struct{}),
 		msgQ:        make(chan *packet, 2048),
-		outChan:     make(chan *network.Conn, 8),
-		inChan:      make(chan *network.Conn, 8),
+		outChan:     make(chan *network.Session, 8),
+		inChan:      make(chan *network.Session, 8),
 		timeStamp:   time.Now().Unix(),
 		logicServer: logicServer,
 		secretKey:   "test_room",
@@ -119,8 +119,8 @@ func (r *Room) OnGameOver(id uint64) {
 
 }
 
-// OnConnect network.Conn callback
-func (r *Room) OnConnect(conn *network.Conn) bool {
+// OnConnect network.Session callback
+func (r *Room) OnConnect(conn *network.Session) bool {
 
 	conn.SetCallback(r) // SetCallback只能在OnConnect里调
 	r.inChan <- conn
@@ -129,8 +129,8 @@ func (r *Room) OnConnect(conn *network.Conn) bool {
 	return true
 }
 
-// OnMessage network.Conn callback
-func (r *Room) OnMessage(conn *network.Conn, msg network.IPacket) bool {
+// OnMessage network.Session callback
+func (r *Room) OnMessage(conn *network.Session, msg network.IPacket) bool {
 
 	id, ok := conn.GetExtraData().(uint64)
 	if !ok {
@@ -147,8 +147,8 @@ func (r *Room) OnMessage(conn *network.Conn, msg network.IPacket) bool {
 	return true
 }
 
-// OnClose network.Conn callback
-func (r *Room) OnClose(conn *network.Conn) {
+// OnClose network.Session callback
+func (r *Room) OnClose(conn *network.Session) {
 	r.outChan <- conn
 	if id, ok := conn.GetExtraData().(uint64); ok {
 		l4g.Warn("[room(%d)] OnClose %d", r.roomID, id)

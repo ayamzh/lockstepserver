@@ -22,7 +22,7 @@ type testCallback struct {
 	numDiscon uint32
 }
 
-func (t *testCallback) OnMessage(conn *network.Conn, msg network.IPacket) bool {
+func (t *testCallback) OnMessage(conn *network.Session, msg network.IPacket) bool {
 
 	atomic.AddUint32(&t.numMsg, 1)
 
@@ -31,14 +31,14 @@ func (t *testCallback) OnMessage(conn *network.Conn, msg network.IPacket) bool {
 	return true
 }
 
-func (t *testCallback) OnConnect(conn *network.Conn) bool {
+func (t *testCallback) OnConnect(conn *network.Session) bool {
 	id := atomic.AddUint32(&t.numConn, 1)
 	conn.PutExtraData(id)
 	// fmt.Println("OnConnect", conn.GetExtraData())
 	return true
 }
 
-func (t *testCallback) OnClose(conn *network.Conn) {
+func (t *testCallback) OnClose(conn *network.Session) {
 	atomic.AddUint32(&t.numDiscon, 1)
 
 	// fmt.Println("OnDisconnect", conn.GetExtraData())
@@ -61,7 +61,7 @@ func Test_KCPServer(t *testing.T) {
 	callback := &testCallback{}
 	server := network.NewServer(config, callback, &network.DefaultProtocol{})
 
-	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Conn {
+	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Session {
 		kcpConn := conn.(*kcp.UDPSession)
 		kcpConn.SetNoDelay(1, 10, 2, 1)
 		kcpConn.SetStreamMode(true)
@@ -70,7 +70,7 @@ func Test_KCPServer(t *testing.T) {
 		kcpConn.SetWriteBuffer(4 * 1024 * 1024)
 		kcpConn.SetACKNoDelay(true)
 
-		return network.NewConn(conn, server)
+		return network.NewSession(conn, server)
 	})
 	defer server.Stop()
 
@@ -135,7 +135,7 @@ func Benchmark_KCPServer(b *testing.B) {
 	callback := &testCallback{}
 	server := network.NewServer(config, &testCallback{}, &network.DefaultProtocol{})
 
-	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Conn {
+	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Session {
 		kcpConn := conn.(*kcp.UDPSession)
 		kcpConn.SetNoDelay(1, 10, 2, 1)
 		kcpConn.SetStreamMode(true)
@@ -144,7 +144,7 @@ func Benchmark_KCPServer(b *testing.B) {
 		kcpConn.SetWriteBuffer(4 * 1024 * 1024)
 		kcpConn.SetACKNoDelay(true)
 
-		return network.NewConn(conn, server)
+		return network.NewSession(conn, server)
 	})
 
 	time.Sleep(time.Millisecond * 100)
@@ -225,8 +225,8 @@ func Test_TCPServer(t *testing.T) {
 	callback := &testCallback{}
 	server := network.NewServer(config, callback, &network.DefaultProtocol{})
 
-	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Conn {
-		return network.NewConn(conn, server)
+	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Session {
+		return network.NewSession(conn, server)
 	})
 
 	time.Sleep(time.Second)

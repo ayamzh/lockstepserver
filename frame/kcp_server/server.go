@@ -16,7 +16,7 @@ func ListenAndServe(config *network.Config, callback network.IConnCallback,
 	}
 
 	server := network.NewServer(config, callback, protocol)
-	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Conn {
+	go server.Start(l, func(conn net.Conn, i *network.Server) *network.Session {
 
 		// 普通模式
 		// setKCPConfig(32, 32, 0, 40, 0, 0, 100, 1400)
@@ -35,7 +35,7 @@ func ListenAndServe(config *network.Config, callback network.IConnCallback,
 		kcpConn.SetACKNoDelay(true)
 
 		// 创建一个连接
-		return network.NewConn(conn, server)
+		return network.NewSession(conn, server)
 	})
 
 	return server, nil

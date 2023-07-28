@@ -26,7 +26,7 @@ func NewServer(config *Config, callback IConnCallback, protocol IProtocol) *Serv
 	}
 }
 
-type ConnectionCreator func(net.Conn, *Server) *Conn
+type ConnectionCreator func(net.Conn, *Server) *Session
 
 // Start starts service
 func (s *Server) Start(listener net.Listener, create ConnectionCreator) {

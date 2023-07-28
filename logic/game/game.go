@@ -71,7 +71,7 @@ func NewGame(id uint64, players []uint64, randomSeed int32, listener gameListene
 }
 
 // JoinGame 加入游戏
-func (g *Game) JoinGame(id uint64, conn *network.Conn) bool {
+func (g *Game) JoinGame(id uint64, conn *network.Session) bool {
 
 	msg := &pb.S2C_ConnectMsg{
 		ErrorCode: pb.ERRORCODE_ERR_Ok,

@@ -17,7 +17,7 @@ func verifyToken(secret string) string {
 }
 
 // OnConnect 链接进来
-func (r *LockStepServer) OnConnect(conn *network.Conn) bool {
+func (r *LockStepServer) OnConnect(conn *network.Session) bool {
 	count := atomic.AddInt64(&r.totalConn, 1)
 	l4g.Debug("[router] OnConnect [%s] totalConn=%d", conn.GetRawConn().RemoteAddr().String(), count)
 	// TODO 可以做一些check，不合法返回false
@@ -25,7 +25,7 @@ func (r *LockStepServer) OnConnect(conn *network.Conn) bool {
 }
 
 // OnMessage 消息处理
-func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
+func (r *LockStepServer) OnMessage(conn *network.Session, p network.IPacket) bool {
 
 	msg := p.(*pb_packet.Packet)
 
@@ -104,7 +104,7 @@ func (r *LockStepServer) OnMessage(conn *network.Conn, p network.IPacket) bool {
 }
 
 // OnClose 链接断开
-func (r *LockStepServer) OnClose(conn *network.Conn) {
+func (r *LockStepServer) OnClose(conn *network.Session) {
 	count := atomic.AddInt64(&r.totalConn, -1)
 
 	l4g.Info("[router] OnClose: total=%d", count)

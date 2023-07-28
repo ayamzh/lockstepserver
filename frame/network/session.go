@@ -15,8 +15,8 @@ var (
 	ErrReadBlocking  = errors.New("read packet was blocking")
 )
 
-// Conn exposes a set of callbacks for the various events that occur on a connection
-type Conn struct {
+// Session exposes a set of callbacks for the various events that occur on a connection
+type Session struct {
 	srv               *Server
 	conn              net.Conn      // the raw connection
 	extraData         interface{}   // to save extra data
@@ -32,19 +32,19 @@ type Conn struct {
 type IConnCallback interface {
 	// OnConnect is called when the connection was accepted,
 	// If the return value of false is closed
-	OnConnect(*Conn) bool
+	OnConnect(*Session) bool
 
 	// OnMessage is called when the connection receives a packet,
 	// If the return value of false is closed
-	OnMessage(*Conn, IPacket) bool
+	OnMessage(*Session, IPacket) bool
 
 	// OnClose is called when the connection closed
-	OnClose(*Conn)
+	OnClose(*Session)
 }
 
-// NewConn returns a wrapper of raw conn
-func NewConn(conn net.Conn, srv *Server) *Conn {
-	return &Conn{
+// NewSession returns a wrapper of raw conn
+func NewSession(conn net.Conn, srv *Server) *Session {
+	return &Session{
 		srv:               srv,
 		callback:          srv.callback,
 		conn:              conn,
@@ -54,45 +54,45 @@ func NewConn(conn net.Conn, srv *Server) *Conn {
 	}
 }
 
-// GetExtraData gets the extra data from the Conn
-func (c *Conn) GetExtraData() interface{} {
-	return c.extraData
+// GetExtraData gets the extra data from the Session
+func (s *Session) GetExtraData() interface{} {
+	return s.extraData
 }
 
-// PutExtraData puts the extra data with the Conn
-func (c *Conn) PutExtraData(data interface{}) {
-	c.extraData = data
+// PutExtraData puts the extra data with the Session
+func (s *Session) PutExtraData(data interface{}) {
+	s.extraData = data
 }
 
-// GetRawConn returns the raw net.TCPConn from the Conn
-func (c *Conn) GetRawConn() net.Conn {
-	return c.conn
+// GetRawConn returns the raw net.TCPConn from the Session
+func (s *Session) GetRawConn() net.Conn {
+	return s.conn
 }
 
 // Close closes the connection
-func (c *Conn) Close() {
-	c.closeOnce.Do(func() {
-		atomic.StoreInt32(&c.closeFlag, 1)
-		close(c.closeChan)
-		close(c.packetSendChan)
-		close(c.packetReceiveChan)
-		c.conn.Close()
-		c.callback.OnClose(c)
+func (s *Session) Close() {
+	s.closeOnce.Do(func() {
+		atomic.StoreInt32(&s.closeFlag, 1)
+		close(s.closeChan)
+		close(s.packetSendChan)
+		close(s.packetReceiveChan)
+		s.conn.Close()
+		s.callback.OnClose(s)
 	})
 }
 
 // IsClosed indicates whether or not the connection is closed
-func (c *Conn) IsClosed() bool {
-	return atomic.LoadInt32(&c.closeFlag) == 1
+func (s *Session) IsClosed() bool {
+	return atomic.LoadInt32(&s.closeFlag) == 1
 }
 
-func (c *Conn) SetCallback(callback IConnCallback) {
-	c.callback = callback
+func (s *Session) SetCallback(callback IConnCallback) {
+	s.callback = callback
 }
 
 // AsyncWritePacket async writes a packet, this method will never block
-func (c *Conn) AsyncWritePacket(p IPacket, timeout time.Duration) (err error) {
-	if c.IsClosed() {
+func (s *Session) AsyncWritePacket(p IPacket, timeout time.Duration) (err error) {
+	if s.IsClosed() {
 		return ErrConnClosing
 	}
 
@@ -104,7 +104,7 @@ func (c *Conn) AsyncWritePacket(p IPacket, timeout time.Duration) (err error) {
 
 	if timeout == 0 {
 		select {
-		case c.packetSendChan <- p:
+		case s.packetSendChan <- p:
 			return nil
 
 		default:
@@ -113,10 +113,10 @@ func (c *Conn) AsyncWritePacket(p IPacket, timeout time.Duration) (err error) {
 
 	} else {
 		select {
-		case c.packetSendChan <- p:
+		case s.packetSendChan <- p:
 			return nil
 
-		case <-c.closeChan:
+		case <-s.closeChan:
 			return ErrConnClosing
 
 		case <-time.After(timeout):
@@ -126,91 +126,91 @@ func (c *Conn) AsyncWritePacket(p IPacket, timeout time.Duration) (err error) {
 }
 
 // Do it
-func (c *Conn) Do() {
-	if !c.callback.OnConnect(c) {
+func (s *Session) Do() {
+	if !s.callback.OnConnect(s) {
 		return
 	}
 
-	asyncDo(c.handleLoop, c.srv.waitGroup)
-	asyncDo(c.readLoop, c.srv.waitGroup)
-	asyncDo(c.writeLoop, c.srv.waitGroup)
+	asyncDo(s.handleLoop, s.srv.waitGroup)
+	asyncDo(s.readLoop, s.srv.waitGroup)
+	asyncDo(s.writeLoop, s.srv.waitGroup)
 }
 
-func (c *Conn) readLoop() {
+func (s *Session) readLoop() {
 	defer func() {
 		recover()
-		c.Close()
+		s.Close()
 	}()
 
 	for {
 		select {
-		case <-c.srv.exitChan:
+		case <-s.srv.exitChan:
 			return
 
-		case <-c.closeChan:
+		case <-s.closeChan:
 			return
 
 		default:
 		}
 
-		c.conn.SetReadDeadline(time.Now().Add(c.srv.config.ConnReadTimeout))
-		p, err := c.srv.protocol.ReadPacket(c.conn)
+		s.conn.SetReadDeadline(time.Now().Add(s.srv.config.ConnReadTimeout))
+		p, err := s.srv.protocol.ReadPacket(s.conn)
 		if err != nil {
 			return
 		}
 
-		c.packetReceiveChan <- p
+		s.packetReceiveChan <- p
 	}
 }
 
-func (c *Conn) writeLoop() {
+func (s *Session) writeLoop() {
 	defer func() {
 		recover()
-		c.Close()
+		s.Close()
 	}()
 
 	for {
 		select {
-		case <-c.srv.exitChan:
+		case <-s.srv.exitChan:
 			return
 
-		case <-c.closeChan:
+		case <-s.closeChan:
 			return
 
-		case p := <-c.packetSendChan:
-			if c.IsClosed() {
+		case p := <-s.packetSendChan:
+			if s.IsClosed() {
 				return
 			}
-			c.conn.SetWriteDeadline(time.Now().Add(c.srv.config.ConnWriteTimeout))
-			if _, err := c.conn.Write(p.Serialize()); err != nil {
+			s.conn.SetWriteDeadline(time.Now().Add(s.srv.config.ConnWriteTimeout))
+			if _, err := s.conn.Write(p.Serialize()); err != nil {
 				return
 			}
 		}
 	}
 }
 
-func (c *Conn) handleLoop() {
+func (s *Session) handleLoop() {
 	defer func() {
 		recover()
 		//关闭连接、执行CALLBACK、关闭各种读写chan
-		c.Close()
+		s.Close()
 	}()
 
 	for {
 		select {
 		//服务关闭
-		case <-c.srv.exitChan:
+		case <-s.srv.exitChan:
 			return
 		//连接关闭
-		case <-c.closeChan:
+		case <-s.closeChan:
 			return
 		//接收数据
-		case p := <-c.packetReceiveChan:
-			if c.IsClosed() {
+		case p := <-s.packetReceiveChan:
+			if s.IsClosed() {
 				return
 			}
 			//消费数据
-			if !c.callback.OnMessage(c, p) {
+			if !s.callback.OnMessage(s, p) {
 				return
 			}
 		}

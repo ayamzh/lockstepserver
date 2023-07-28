@@ -14,7 +14,7 @@ type Player struct {
 	loadingProgress   int32
 	lastHeartbeatTime int64
 	sendFrameCount    uint32
-	client            *network.Conn
+	client            *network.Session
 }
 
 func NewPlayer(id uint64, idx int32) *Player {
@@ -26,7 +26,7 @@ func NewPlayer(id uint64, idx int32) *Player {
 	return p
 }
 
-func (p *Player) Connect(conn *network.Conn) {
+func (p *Player) Connect(conn *network.Session) {
 	p.client = conn
 	p.isOnline = true
 	p.isReady = false
