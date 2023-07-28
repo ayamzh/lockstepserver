@@ -59,8 +59,8 @@ func (s *Server) Start(listener net.Listener, create ConnectionCreator) {
 
 		s.waitGroup.Add(1)
 		go func() {
+			defer s.waitGroup.Done()
 			create(conn, s).Do()
-			s.waitGroup.Done()
 		}()
 	}
 }

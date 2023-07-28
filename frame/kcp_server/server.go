@@ -40,6 +40,7 @@ func ListenAndServe(addr string, callback network.IConnCallback, protocol networ
 		kcpConn.SetWriteBuffer(4 * 1024 * 1024)
 		kcpConn.SetACKNoDelay(true)
 
+		// 创建一个连接
 		return network.NewConn(conn, server)
 	})
 
