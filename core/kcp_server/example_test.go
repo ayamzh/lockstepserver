@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/byebyebruce/lockstepserver/frame/network"
+	"github.com/byebyebruce/lockstepserver/core/network"
 
 	"github.com/xtaci/kcp-go"
 )

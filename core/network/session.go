@@ -131,8 +131,11 @@ func (s *Session) Do() {
 		return
 	}
 
+	//处理消息
 	asyncDo(s.handleLoop, s.srv.waitGroup)
+	//解包
 	asyncDo(s.readLoop, s.srv.waitGroup)
+	//发包
 	asyncDo(s.writeLoop, s.srv.waitGroup)
 }
 
@@ -153,7 +156,7 @@ func (s *Session) readLoop() {
 		default:
 		}
 
-		s.conn.SetReadDeadline(time.Now().Add(s.srv.config.ConnReadTimeout))
+		s.conn.SetReadDeadline(time.Now().Add(s.srv.config.GetConnReadTimeout()))
 		p, err := s.srv.protocol.ReadPacket(s.conn)
 		if err != nil {
 			return
@@ -181,7 +184,7 @@ func (s *Session) writeLoop() {
 			if s.IsClosed() {
 				return
 			}
-			s.conn.SetWriteDeadline(time.Now().Add(s.srv.config.ConnWriteTimeout))
+			s.conn.SetWriteDeadline(time.Now().Add(s.srv.config.GetConnWriteTimeout()))
 			if _, err := s.conn.Write(p.Serialize()); err != nil {
 				return
 			}

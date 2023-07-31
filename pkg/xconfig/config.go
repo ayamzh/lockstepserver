@@ -3,7 +3,7 @@ package xconfig
 import (
 	"bytes"
 	"fmt"
-	"github.com/byebyebruce/lockstepserver/frame/network"
+	"github.com/byebyebruce/lockstepserver/core/network"
 	"github.com/sandwich-go/xconf"
 )
 

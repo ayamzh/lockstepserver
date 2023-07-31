@@ -3,7 +3,7 @@ package game
 import (
 	"time"
 
-	"github.com/byebyebruce/lockstepserver/frame/network"
+	"github.com/byebyebruce/lockstepserver/core/network"
 )
 
 type Player struct {

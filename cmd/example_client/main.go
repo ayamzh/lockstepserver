@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/byebyebruce/lockstepserver/frame/packet/pb_packet"
+	"github.com/byebyebruce/lockstepserver/core/packet/pb_packet"
 	"github.com/byebyebruce/lockstepserver/pb"
 	"github.com/golang/protobuf/proto"
 
@@ -67,8 +67,8 @@ func main() {
 
 	// connect
 	if _, e := c.Write(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), &pb.C2S_ConnectMsg{
-		PlayerID: proto.Uint64(*id),
-		BattleID: proto.Uint64(*room),
+		PlayerID: *id,
+		BattleID: *room,
 	}).Serialize()); nil != e {
 		panic(fmt.Sprintf("write error:%s", e.Error()))
 	}
@@ -86,7 +86,7 @@ func main() {
 	// write
 	for i := 0; i < 10; i++ {
 		p := pb_packet.NewPacket(uint8(pb.ID_MSG_Input), &pb.C2S_InputMsg{
-			Sid: proto.Int32(int32(i)),
+			Sid: int32(i),
 		})
 
 		if _, e := c.Write(p.Serialize()); nil != e {

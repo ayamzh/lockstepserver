@@ -4,8 +4,8 @@ import (
 	"time"
 
 	l4g "github.com/alecthomas/log4go"
-	"github.com/byebyebruce/lockstepserver/frame/network"
-	"github.com/byebyebruce/lockstepserver/frame/packet/pb_packet"
+	"github.com/byebyebruce/lockstepserver/core/network"
+	"github.com/byebyebruce/lockstepserver/core/packet/pb_packet"
 	"github.com/byebyebruce/lockstepserver/pb"
 )
 

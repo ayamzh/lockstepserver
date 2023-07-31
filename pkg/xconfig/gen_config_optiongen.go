@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/byebyebruce/lockstepserver/frame/network"
+	"github.com/byebyebruce/lockstepserver/core/network"
 )
 
 // Config should use NewConfig to initialize it

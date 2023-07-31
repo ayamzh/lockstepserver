@@ -6,7 +6,7 @@ import (
 	"io"
 
 	l4g "github.com/alecthomas/log4go"
-	"github.com/byebyebruce/lockstepserver/frame/network"
+	"github.com/byebyebruce/lockstepserver/core/network"
 	"github.com/golang/protobuf/proto"
 )
 

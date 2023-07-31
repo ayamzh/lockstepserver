@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/byebyebruce/lockstepserver/cmd/example_server/api"
-	"github.com/byebyebruce/lockstepserver/frame/log4gox"
+	"github.com/byebyebruce/lockstepserver/core/log4gox"
 	"github.com/byebyebruce/lockstepserver/server"
 
 	l4g "github.com/alecthomas/log4go"
