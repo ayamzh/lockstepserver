@@ -71,22 +71,22 @@ func NewGame(id uint64, players []uint64, randomSeed int32, listener gameListene
 }
 
 // JoinGame 加入游戏
-func (g *Game) JoinGame(id uint64, conn *network.Session) bool {
+func (g *Game) JoinGame(playerID uint64, conn *network.Session) bool {
 
 	msg := &pb.S2C_ConnectMsg{
 		ErrorCode: pb.ERRORCODE_ERR_Ok,
 	}
 
-	p, ok := g.players[id]
+	p, ok := g.players[playerID]
 	if !ok {
-		l4g.Error("[game(%d)] player[%d] join room failed", g.id, id)
+		l4g.Error("[game(%d)] player[%d] join room failed", g.id, playerID)
 		return false
 	}
 
 	if k_Ready != g.State && k_Gaming != g.State {
 		msg.ErrorCode = pb.ERRORCODE_ERR_RoomState
 		p.SendMessage(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), msg))
-		l4g.Error("[game(%d)] player[%d] game is over", g.id, id)
+		l4g.Error("[game(%d)] player[%d] game is over", g.id, playerID)
 		return true
 	}
 
@@ -94,14 +94,14 @@ func (g *Game) JoinGame(id uint64, conn *network.Session) bool {
 	if nil != p.client {
 		// TODO 这里有多线程操作的危险 如果调 p.client.Close() 会把现有刚进来的玩家提调
 		p.client.PutExtraData(nil)
-		l4g.Error("[game(%d)] player[%d] replace", g.id, id)
+		l4g.Error("[game(%d)] player[%d] replace", g.id, playerID)
 	}
 
 	p.Connect(conn)
 
 	p.SendMessage(pb_packet.NewPacket(uint8(pb.ID_MSG_Connect), msg))
 
-	g.listener.OnJoinGame(g.id, id)
+	g.listener.OnJoinGame(g.id, playerID)
 
 	return true
 

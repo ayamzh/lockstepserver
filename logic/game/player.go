@@ -9,10 +9,10 @@ import (
 type Player struct {
 	id                uint64
 	idx               int32
-	isReady           bool
-	isOnline          bool
+	isReady           bool //是否准备好
+	isOnline          bool //是否在线
 	loadingProgress   int32
-	lastHeartbeatTime int64
+	lastHeartbeatTime int64 //最后一次心跳时间
 	sendFrameCount    uint32
 	client            *network.Session
 }

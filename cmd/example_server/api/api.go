@@ -29,6 +29,7 @@ func NewWebAPI(port int, m *logic.RoomManager) *WebAPI {
 
 	http.HandleFunc("/", r.index)
 	http.HandleFunc("/create", r.createRoom)
+	http.HandleFunc("/quit", r.quitRoom)
 
 	go func() {
 		fmt.Printf("web api listen on 127.0.0.1:%d \n", port)
@@ -87,4 +88,35 @@ func (h *WebAPI) createRoom(w http.ResponseWriter, r *http.Request) {
 		ret = fmt.Sprintf("room.ID=[%d] room.Secret=[%s] room.Time=[%d], room.Member=[%v]", room.ID(), room.SecretKey(), room.TimeStamp(), members)
 	}
 
+}
+
+func (h *WebAPI) quitRoom(w http.ResponseWriter, r *http.Request) {
+
+	ret := "error"
+
+	defer func() {
+		w.Write([]byte(ret))
+	}()
+
+	query := r.URL.Query()
+
+	roomStr := query.Get("room")
+	roomID, _ := strconv.ParseUint(roomStr, 10, 64)
+
+	playerStr := query.Get("player")
+	playerID, _ := strconv.ParseUint(playerStr, 10, 64)
+
+	room := h.m.GetRoom(roomID)
+	if room == nil {
+		ret = "room not exist"
+		return
+	}
+
+	if !room.HasPlayer(playerID) {
+		ret = "player not exist"
+		return
+	}
+
+	ret = "player is leave room"
+	return
 }
