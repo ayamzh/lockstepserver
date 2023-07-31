@@ -23,7 +23,8 @@ func NewRoomManager() *RoomManager {
 }
 
 // CreateRoom 创建房间
-func (m *RoomManager) CreateRoom(id uint64, typeID int32, playerID []uint64, randomSeed int32, logicServer string) (*room.Room, error) {
+func (m *RoomManager) CreateRoom(id uint64, typeID int32, playerIDs []uint64, randomSeed int32,
+	logicServer string) (*room.Room, error) {
 	m.rw.Lock()
 	defer m.rw.Unlock()
 
@@ -32,7 +33,7 @@ func (m *RoomManager) CreateRoom(id uint64, typeID int32, playerID []uint64, ran
 		return nil, fmt.Errorf("room id[%d] exists", id)
 	}
 
-	r = room.NewRoom(id, typeID, playerID, randomSeed, logicServer)
+	r = room.NewRoom(id, typeID, playerIDs, randomSeed, logicServer)
 	m.room[id] = r
 
 	go func() {

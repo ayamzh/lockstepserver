@@ -36,7 +36,7 @@ type gameListener interface {
 
 // Game 一局游戏
 type Game struct {
-	id               uint64
+	id               uint64 // 和房间ID一致
 	startTime        int64
 	randomSeed       int32
 	State            GameState

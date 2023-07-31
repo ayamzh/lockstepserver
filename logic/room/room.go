@@ -27,7 +27,7 @@ type packet struct {
 type Room struct {
 	wg sync.WaitGroup
 
-	roomID      uint64
+	roomID      uint64 //房间ID
 	players     []uint64
 	typeID      int32
 	closeFlag   int32
@@ -36,9 +36,9 @@ type Room struct {
 	logicServer string
 
 	exitChan chan struct{}
-	msgQ     chan *packet
-	inChan   chan *network.Session
-	outChan  chan *network.Session
+	msgQ     chan *packet          //房间onmessage方法里投递
+	inChan   chan *network.Session //进入房间的用户session队列
+	outChan  chan *network.Session //离开房价的用户session队列
 
 	game *game.Game
 }
@@ -190,8 +190,10 @@ LOOP:
 		case <-timeoutTimer.C:
 			l4g.Error("[room(%d)] time out", r.roomID)
 			break LOOP
+			//投递到Room的消息
 		case msg := <-r.msgQ:
 			r.game.ProcessMsg(msg.id, msg.msg.(*pb_packet.Packet))
+			//服务器帧同步
 		case <-tickerTick.C:
 			if !r.game.Tick(time.Now().Unix()) {
 				l4g.Info("[room(%d)] tick over", r.roomID)

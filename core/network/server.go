@@ -18,7 +18,8 @@ type Server struct {
 // NewServer creates a server
 func NewServer(config *Config, callback IConnCallback, protocol IProtocol) *Server {
 	return &Server{
-		config:    config,
+		config: config,
+		//这里用的是LockStepServer的Callback
 		callback:  callback,
 		protocol:  protocol,
 		exitChan:  make(chan struct{}),

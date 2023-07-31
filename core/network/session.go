@@ -212,7 +212,7 @@ func (s *Session) handleLoop() {
 			if s.IsClosed() {
 				return
 			}
-			//消费数据
+			//消费数据 用的是room里得onmessage方法
 			if !s.callback.OnMessage(s, p) {
 				return
 			}
