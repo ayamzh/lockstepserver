@@ -15,6 +15,7 @@ type Player struct {
 	lastHeartbeatTime int64 //最后一次心跳时间
 	sendFrameCount    uint32
 	client            *network.Session
+	info              []byte //用户信息
 }
 
 func NewPlayer(id uint64, idx int32) *Player {
