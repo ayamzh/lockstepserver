@@ -336,7 +336,7 @@ func (g *Game) pushInput(p *Player, msg *pb.C2S_InputMsg) bool {
 
 	cmd := &pb.InputData{
 		Id:         p.id,
-		Sid:        msg.GetSid(),
+		MoveId:     msg.GetMoveId(),
 		X:          msg.GetX(),
 		Y:          msg.GetY(),
 		Roomseatid: p.idx,
